@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="ats.client.View.FaceDetectView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ats.client.View"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <Grid>
+        <Image Name="FaceImage" Stretch="Fill" />
+        <Button x:Name="captureButton" Click="captureButton_Click" >capture Button</Button>
+
+        <TextBlock Text="Test" x:Name="txtName"></TextBlock>
+        <TextBlock x:Name="txtNumberOfFace"></TextBlock>
+        
+    </Grid>
+</UserControl>

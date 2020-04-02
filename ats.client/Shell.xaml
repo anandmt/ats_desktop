@@ -1,0 +1,82 @@
+﻿<Window x:Class="ats.client.Shell"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ats.client"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:uc="clr-namespace:ats.client.View"
+        Title="Attendance Tracking System" 
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{StaticResource MaterialDesignFont}">
+    <Grid>
+        <Viewbox VerticalAlignment="Top" Stretch="Uniform"
+                 HorizontalAlignment="Center">
+            <StackPanel Orientation="Vertical">
+                <materialDesign:ColorZone Mode="PrimaryDark"
+                                          Padding="16"
+                                          CornerRadius="3"
+                                          materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                                          Margin="2">
+                    <StackPanel Orientation="Horizontal">
+                        <ToggleButton Cursor="Hand"
+                                      Style="{DynamicResource MaterialDesignHamburgerToggleButton}"
+                                      IsChecked="False"
+                                      x:Name="MenuToggleButton" />
+                        <TextBlock VerticalAlignment="Center"
+                                   Style="{StaticResource MaterialDesignHeadline3TextBlock}"
+                                   Margin="16 0 0 0"
+                                   Text="ATS" />
+                        <TextBlock VerticalAlignment="Center"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                   Margin="16 0 0 0"
+                                   Text="(Attendance Tracking System)" />
+                    </StackPanel>
+                </materialDesign:ColorZone>
+
+                <materialDesign:Card Margin="20"
+                                     Height="500">
+                    <StackPanel Orientation="Vertical"
+                                Margin="30">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50*" />
+                                <ColumnDefinition Width="50*" />
+                            </Grid.ColumnDefinitions>
+                            <uc:FaceDetectView DataContext="{Binding FaceModel}" Grid.Column="0"/>
+                            <Grid Grid.Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="50*" />
+                                    <RowDefinition Height="50*" />
+                                </Grid.RowDefinitions>
+                                <!--<uc:OpenFileView Margin="20,0,0,0"
+                                                 Grid.Row="0" />-->
+
+                                <!--<uc:CalculateView Margin="20"
+                                                  Grid.Row="1" />-->
+                            </Grid>
+                        </Grid>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <materialDesign:Snackbar IsActive="{Binding ElementName=MenuToggleButton, Path=IsChecked}">
+                    <materialDesign:SnackbarMessage>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ThumbUp"
+                                                     Height="30"
+                                                     Width="30" />
+                            <TextBlock Margin="7"
+                                       Text="Design and Developed by 'Anand Mani Tiwari (anandtiwari@live.com)'"></TextBlock>
+                        </StackPanel>
+                    </materialDesign:SnackbarMessage>
+                </materialDesign:Snackbar>
+
+            </StackPanel>
+        </Viewbox>
+    </Grid>
+</Window>
