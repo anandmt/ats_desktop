@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="ats.client.View.OpenFile"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ats.client.View"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <StackPanel Orientation="Horizontal" Margin="0 0 0 0">
+        <TextBox Style="{StaticResource MaterialDesignComboBoxEditableTextBox}"
+                 Margin="0,0,0,0"
+                 IsEnabled="False"
+                 VerticalAlignment="Center"
+                 Height="85"
+                 MinWidth="500"
+                 MaxWidth="640"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto"
+                 materialDesign:HintAssist.Hint="Selected File"
+                 Text="{Binding ReservoirDataModel.SelectedFile}"></TextBox>
+        <materialDesign:Badged  Badge="{materialDesign:PackIcon Size=15, Kind=SearchWeb }"
+                                BadgeColorZoneMode="Accent">
+            <Button Command="{Binding OpenFileCommand}"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth2"
+                    ToolTip="Click to import the data file (*.csv)"
+                    Height="85">
+                <StackPanel>
+                    <TextBlock Text="Import Reservoir Data File" />
+                    <materialDesign:PackIcon Margin="65 5 0 0" Height="24" Width="24"
+                                             Kind="DotsHorizontalCircle" />
+                </StackPanel>
+            </Button>
+        </materialDesign:Badged>
+    </StackPanel>
+</UserControl>

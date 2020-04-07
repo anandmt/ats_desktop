@@ -59,5 +59,15 @@ namespace ats.client.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap anand_lnkdn {
+            get {
+                object obj = ResourceManager.GetObject("anand_lnkdn", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

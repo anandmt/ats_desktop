@@ -1,4 +1,7 @@
-﻿using Autofac;
+﻿using ats.client.Helpers;
+using ats.client.Model;
+using ats.client.ViewModel;
+using Autofac;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +32,8 @@ namespace ats.client
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<Shell>().SingleInstance();
+            builder.RegisterType<FaceDataModel>().InstancePerLifetimeScope();
+            builder.RegisterType<AtsViewModel>().InstancePerLifetimeScope();
         }
     }
 }

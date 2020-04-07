@@ -14,18 +14,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ats.client
+namespace ats.client.View
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for RegisteredUserView.xaml
     /// </summary>
-    public partial class Shell : Window
+    public partial class RegisteredUserView : UserControl
     {
-        public Shell(AtsViewModel atsViewModel)
+        public RegisteredUserView()
         {
             InitializeComponent();
-            this.DataContext = atsViewModel;
-           // ucRegdUser.DataContext = atsViewModel.FaceDataModels;
         }
     }
 }

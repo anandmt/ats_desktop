@@ -6,14 +6,9 @@
              xmlns:local="clr-namespace:ats.client.View"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
-        <Image Name="FaceImage" Stretch="Fill" Grid.Row="0" Grid.Column="0" />
-        <Button x:Name="captureButton" Click="captureButton_Click" Grid.Column="1" Grid.Row="0" >capture Button</Button>
+
+        <Image Height="500" Name="FaceImage" Stretch="Fill" Source="/Resources/anand_lnkdn.jpg" />
+        <!--<Button x:Name="captureButton" Click="captureButton_Click" Grid.Column="1" Grid.Row="0" >capture Button</Button>
+        <TextBlock x:Name="txtName" Grid.Row="0" Grid.Column="1"></TextBlock>-->
     </Grid>
 </UserControl>

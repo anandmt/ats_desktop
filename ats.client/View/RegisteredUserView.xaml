@@ -1,0 +1,27 @@
+﻿<UserControl x:Class="ats.client.View.RegisteredUserView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ats.client.View"
+              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:ViewModel="clr-namespace:ats.client.ViewModel"
+             >
+
+    <ListView  ItemsSource="{Binding FaceDataModel.FaceData.FaceDataModels}" >
+        <ListView.ItemTemplate>
+            <DataTemplate>
+                <materialDesign:Chip
+                         Background="Green"
+	                     Content="{Binding Name}">
+                    <materialDesign:Chip.Icon>
+                        <Image Source="{Binding FaceDataModel.FaceData.ImageSource}" />
+                    </materialDesign:Chip.Icon>
+                </materialDesign:Chip>
+            </DataTemplate>
+        </ListView.ItemTemplate>
+    </ListView>
+
+   
+
+</UserControl>

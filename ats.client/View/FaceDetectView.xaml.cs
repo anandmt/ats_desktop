@@ -15,6 +15,7 @@ using System.Drawing;
 using ats.client.Model;
 using System.Runtime.CompilerServices;
 using System.ComponentModel;
+using ats.client.Helpers;
 
 namespace ats.client.View
 {
@@ -26,10 +27,11 @@ namespace ats.client.View
         private VideoCapture _capture;
         private CascadeClassifier _haarCascade;
         DispatcherTimer _timer;
+
         public FaceDetectView()
         {
             InitializeComponent();
-            FaceDetect();
+          //  FaceDetect();
         }
 
         private void FaceDetect()
@@ -46,34 +48,16 @@ namespace ats.client.View
                     var detectedFaces = _haarCascade.DetectMultiScale(grayFrame);
                     foreach (var face in detectedFaces)
                     {
-                        currentFrame.Draw(face, new Bgr(0, double.MaxValue, 0),2, LineType.FourConnected);
+                        currentFrame.Draw(face, new Bgr(0, double.MaxValue, 0), 2, LineType.FourConnected);
                     }
-                    FaceImage.Source = ToBitmapSource(currentFrame);
+                    FaceImage.Source = Helper.ToBitmapSource(currentFrame);
                 }
             };
             _timer.Interval = new TimeSpan(0, 0, 0, 0, 1);
             _timer.Start();
         }
 
-        [DllImport("gdi32")]
-        private static extern int DeleteObject(IntPtr o);
-
-        public static BitmapSource ToBitmapSource(IImage image)
-        {
-            using (System.Drawing.Bitmap source = image.Bitmap)
-            {
-                IntPtr ptr = source.GetHbitmap(); //obtain the Hbitmap
-
-                BitmapSource bs = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                    ptr,
-                    IntPtr.Zero,
-                    Int32Rect.Empty,
-                    BitmapSizeOptions.FromEmptyOptions());
-
-                DeleteObject(ptr); //release the HBitmap
-                return bs;
-            }
-        }
+       
 
         private void captureButton_Click(object sender, RoutedEventArgs e)
         {
