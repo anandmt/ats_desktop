@@ -4,12 +4,14 @@ using System.Collections.ObjectModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using ats.client.Helpers;
 using ats.client.Model;
+using ats.client.Properties;
 using Microsoft.Azure.CognitiveServices.Vision.Face;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.Win32;
@@ -25,7 +27,7 @@ namespace ats.client.ViewModel
            new System.Net.Http.DelegatingHandler[] { });
         string personGroupId = "atsRegisteredGroup";
         private FaceDataModel _faceDataModel;
-        private static BitmapSource _bitmapSource;
+        private BitmapSource _bitmapSource;
         #region Commands
         public ICommand OpenFileCommand { get; }
         public ICommand RegisterCommand { get; }
@@ -51,11 +53,11 @@ namespace ats.client.ViewModel
 
         public AtsViewModel(FaceDataModel faceDataModel)
         {
-            _faceDataModel = faceDataModel;
+            FaceData = faceDataModel;
             OpenFileCommand = new DelegateCommand(OpenFileCommandExecute);
             RegisterCommand = new DelegateCommand(RegisterCommandExecute);
             CreateFolder();
-            _faceDataModel.FaceDataModels = new List<FaceDataModel>();
+            FaceData.FaceDataModels = new ObservableCollection<FaceDataModel>();
             SeedData();
             //if (Uri.IsWellFormedUriString(faceEndpoint, UriKind.Absolute))
             //{
@@ -71,52 +73,80 @@ namespace ats.client.ViewModel
             //CreateUserGroupAsync();
         }
 
+
+
         private void SeedData()
         {
-            Bitmap bitmap = (Bitmap)Bitmap.FromFile(@"C:\ATS\Anand Tiwari\test.jpg", true);
-            _bitmapSource = Helper.BitmapToBitmapSource(bitmap);
-
             CreateFolder("Anand");
-            _faceDataModel.FaceDataModels.Add(new FaceDataModel
+
+            string appFolderPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            string path = Path.Combine(
+                                         Directory.GetParent(appFolderPath).Parent.FullName, "Resources");
+
+            FaceData.FaceDataModels.Add(new FaceDataModel
             {
-                Name = "Anand",
+                Id = 0,
+                Name = "Anand Tiwari",
+                EntryTime = DateTime.Now.ToString(),
+                ExitTime = string.Empty,
+                Status = StatusEnum.Enter.ToString(),
+                SelectedFileName = "anand_lnkdn.jpg",
+                SelectedFile= $"{path}\\anand_lnkdn.jpg",
+                ImageSource = Helper.BitmapToBitmapSource(Resources.anand_lnkdn)
+
+            });
+            SaveImageToFolder(FaceData.FaceDataModels[0].Name,FaceData.FaceDataModels[0].SelectedFileName);
+            FaceData.FaceDataModels.Add(new FaceDataModel
+            {
+                Id = 1,
+                Name = "Arti Tiwari",
                 EntryTime = DateTime.Now.ToString(),
                 ExitTime = DateTime.Now.ToString(),
+                Status = StatusEnum.Exit.ToString(),
+                ImageSource = Helper.BitmapToBitmapSource(Resources.t1),
+                SelectedFileName="t1.jpg",
+                SelectedFile=$"{path}\\t1.jpg"
+
+            });
+            SaveImageToFolder(FaceData.FaceDataModels[1].Name, FaceData.FaceDataModels[1].SelectedFileName);
+
+        }
+
+        private void RegisterCommandExecute(object obj)
+        {
+            CreateFolder(FaceData.Name);
+            var imagePath = SaveImageToFolder(FaceData.Name,FaceData.SelectedFileName);
+            AddPersonToList(imagePath);
+        }
+
+        private void AddPersonToList(string imagePath)
+        {
+            Bitmap bitmap = (Bitmap)Bitmap.FromFile(imagePath, true);
+            _bitmapSource = Helper.BitmapToBitmapSource(bitmap);
+
+            _faceDataModel.FaceDataModels.Add(new FaceDataModel
+            {
+                Name = FaceData.Name,
+                EntryTime = DateTime.Now.ToString("dddd, dd MMMM yyyy"),
                 Status = StatusEnum.Enter.ToString(),
                 ImageSource = _bitmapSource
 
             });
         }
 
-        private void RegisterCommandExecute(object obj)
+        private string SaveImageToFolder(string name, string selectedFileName)
         {
-            CreateFolder(FaceData.Name);
-            SaveImageToFolder();
-            AddPersonToList();
-        }
-
-        private void AddPersonToList()
-        {
-            _faceDataModel.FaceDataModels.Add(new FaceDataModel
-            {
-                Name = FaceData.Name,
-                EntryTime = DateTime.Now.ToString("dddd, dd MMMM yyyy"),
-                Status = StatusEnum.Enter.ToString()
-            });
-        }
-
-        private void SaveImageToFolder()
-        {
-            var path = $"C:\\ATS\\{FaceData.Name}\\{FaceData.SelectedFileName}";
+              var  path = $"C:\\ATS\\{name}\\{selectedFileName}";
 
             if (!File.Exists(path))
             {
                 File.Copy(FaceData.SelectedFile, path);
+                return path;
             }
             else
             {
                 FaceData.Error = $"File {FaceData.SelectedFile} already exists.";
-                return;
+                return "";
             }
         }
 

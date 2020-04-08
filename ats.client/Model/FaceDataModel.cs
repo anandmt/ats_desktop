@@ -3,6 +3,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Media;
@@ -21,9 +22,9 @@ namespace ats.client.Model
         private int id;
         private string error;
         private ImageSource imageSource;
-        private List<FaceDataModel> faceDataModels;
+        private ObservableCollection<FaceDataModel> faceDataModels;
 
-        public List<FaceDataModel> FaceDataModels { get => faceDataModels; set { faceDataModels = value; OnPropertyChanged(nameof(FaceDataModels)); } }
+        public ObservableCollection<FaceDataModel> FaceDataModels { get => faceDataModels; set { faceDataModels = value; OnPropertyChanged(nameof(FaceDataModels)); } }
         public ImageSource ImageSource
         {
             get => imageSource;

@@ -25,7 +25,6 @@ namespace ats.client
         {
             InitializeComponent();
             this.DataContext = atsViewModel;
-           // ucRegdUser.DataContext = atsViewModel.FaceDataModels;
         }
     }
 }

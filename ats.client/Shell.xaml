@@ -21,7 +21,7 @@
                 <materialDesign:ColorZone Mode="PrimaryMid"
                                           Padding="16"
                                           CornerRadius="3"
-                                          materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                                          materialDesign:ShadowAssist.ShadowDepth="Depth3" VerticalAlignment="Stretch"
                                           >
                     <StackPanel Orientation="Horizontal">
                         <ToggleButton Cursor="Hand"
@@ -86,7 +86,7 @@
                                 Margin="30,20,0,0" 
                                 Grid.RowSpan="3"
                                 Grid.Column="2">
-                        <uc:RegisteredUserView x:Name="ucRegdUser"/>
+                        <uc:RegisteredUserView x:Name="ucRegdUser" />
                         </StackPanel>
                        
 
