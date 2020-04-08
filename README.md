@@ -30,8 +30,8 @@ And of course ATS itself is an open source link: [ats_desktop](https://github.co
 
 ### Installation
 
-ATS requires Dot net Framework 4.6.1 or above.
-Azure Face API Subscription for accurate face Matching.
+-ATS requires Dot net Framework 4.6.1 or above.
+-Azure Face API Subscription for accurate face Matching.
 
 ```sh
 Find the setup.exe from release folder and install it on windows pc with Dot net framework 4.6.1 orlater installed.
