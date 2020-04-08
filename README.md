@@ -9,7 +9,7 @@ ATS desktop is a windows presentation foundation (WPF) application, which work o
 
 # Features!
 
-  - Import Your picture and Train for exact face match.
+  - Import Your picture and Train for exact face match with name.
   - Track and Identifies face.
   - On each encounter it changes status from Entry to Exit. 
 
