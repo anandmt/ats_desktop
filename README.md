@@ -4,11 +4,8 @@ A WPF Application for ATS (attendance tracking system).
 
 [![Build Status](https://res.cloudinary.com/dq3npvyjj/image/upload/v1586335386/passing_bnpp6y.svg)](https://github.com/anandmt/ats_desktop)
 
-ATS desktop is a windows presentation foundation application, which work on any supported windows machine including surface, it is powered EmguCV Faceidentification library for face tracking and Azure API for accuret Face matching.
+ATS desktop is a windows presentation foundation (WPF) application, which work on any supported windows machine including surface, it is powered with EmguCV Face identification library for face tracking and Azure API for accuret Face matching.
 
-  - Type some Markdown on the left
-  - See HTML in the right
-  - Magic
 
 # Features!
 
