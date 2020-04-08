@@ -20,13 +20,14 @@ using Microsoft.Azure.CognitiveServices.Vision.Face;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.Win32;
 using System.Drawing.Imaging;
-
+using System.Configuration;
 namespace ats.client.ViewModel
 {
     public class AtsViewModel : ObservableObject
     {
-        private const string subscriptionKey = "d4c8b7435f7643aaba40f3719f0f8bc3";
-        private const string faceEndpoint = "https://smartface.cognitiveservices.azure.com/";
+
+        private static readonly string subscriptionKey = ConfigurationManager.AppSettings["subscriptionKey"];
+        private static readonly string faceEndpoint = ConfigurationManager.AppSettings["faceEndpoint"];
         private readonly IFaceClient faceClient = new FaceClient(
            new ApiKeyServiceClientCredentials(subscriptionKey),
            new System.Net.Http.DelegatingHandler[] { });
@@ -63,15 +64,14 @@ namespace ats.client.ViewModel
 
         public AtsViewModel(FaceDataModel faceDataModel)
         {
+            FaceDetect();
             FaceData = faceDataModel;
             OpenFileCommand = new DelegateCommand(OpenFileCommandExecute);
             RegisterCommand = new DelegateCommand(RegisterCommandExecute);
             MarkAttendanceCommand = new DelegateCommand(MarkAttendanceCommandExecute);
-
             Helper.CreateFolder();
             FaceData.FaceDataModels = new ObservableCollection<FaceDataModel>();
             SeedData();
-            FaceDetect();
             if (Uri.IsWellFormedUriString(faceEndpoint, UriKind.Absolute))
             {
                 faceClient.Endpoint = faceEndpoint;
@@ -79,10 +79,9 @@ namespace ats.client.ViewModel
             else
             {
                 // Environment.Exit(0);
-                FaceData.Error = "Invalid URI";
+                FaceData.Message = "Invalid URI";
             }
             FaceData.IsEnable = true;
-            //  FaceData.IsVisible = !FaceData.IsEnable;
         }
 
 
@@ -120,7 +119,6 @@ namespace ats.client.ViewModel
             };
             _timer.Interval = new TimeSpan(0, 0, 0, 0, 1);
             _timer.Start();
-
         }
 
 
@@ -174,7 +172,7 @@ namespace ats.client.ViewModel
                 AddPersonToList(imagePath);
             else
             {
-                FaceData.Error = "";
+                FaceData.Message = "";
             }
         }
 
@@ -200,7 +198,7 @@ namespace ats.client.ViewModel
             if (!File.Exists(path))
                 File.Copy(selectedFilePath, path);
             else
-                FaceData.Error = $"File {FaceData.SelectedFile} already exists.";
+                FaceData.Message = $"File {FaceData.SelectedFile} already exists.";
             return path;
         }
 
@@ -231,99 +229,126 @@ namespace ats.client.ViewModel
 
         private async void TrainIdentificationModel(string testImagePath)
         {
+
             try
             {
                 await faceClient.PersonGroup.DeleteAsync(personGroupId);
             }
             catch (Exception ex)
             {
-                FaceData.Error = ex.Message;
+                FaceData.Message = ex.Message;
             }
-
-            await faceClient.PersonGroup.CreateAsync(personGroupId, "Ats Registered");
-
-            foreach (var item in FaceData.FaceDataModels)
+            try
             {
-                // Define user
-                Person person = await faceClient.PersonGroupPerson.CreateAsync(
-                    personGroupId,
-                    item.Name
-                );
+                await faceClient.PersonGroup.CreateAsync(personGroupId, "Ats Registered");
 
-                foreach (string imagePath in Directory.GetFiles($"C:\\ATS\\{item.Name}\\", "*.jpg"))
+                foreach (var item in FaceData.FaceDataModels)
                 {
-                    using (Stream s = File.OpenRead(imagePath))
+                    try
                     {
-                        // Detect faces in the image and add
-                        await faceClient.PersonGroupPerson.AddFaceFromStreamAsync(
-                            personGroupId, person.PersonId, s);
+                        // Define user
+                        Person person = await faceClient.PersonGroupPerson.CreateAsync(
+                        personGroupId,
+                        item.Name);
+
+                        foreach (string imagePath in Directory.GetFiles($"C:\\ATS\\{item.Name}\\", "*.jpg"))
+                        {
+                            using (Stream s = File.OpenRead(imagePath))
+                            {
+                                // Detect faces in the image and add
+                                await faceClient.PersonGroupPerson.AddFaceFromStreamAsync(
+                                    personGroupId, person.PersonId, s);
+                            }
+                        }
+
+                        await faceClient.PersonGroup.TrainAsync(personGroupId);
+
+                        TrainingStatus trainingStatus = null;
+                        while (true)
+                        {
+                            trainingStatus = await faceClient.PersonGroup.GetTrainingStatusAsync(personGroupId);
+
+                            if (trainingStatus.Status != TrainingStatusType.Running)
+                            {
+                                break;
+                            }
+
+                            await Task.Delay(1000);
+                        }
+
+                        using (Stream s = File.OpenRead(testImagePath))
+                        {
+                            var faces = await faceClient.Face.DetectWithStreamAsync(s);
+                            var faceIds = faces.Select(face => face.FaceId.Value).ToArray();
+
+                            var results = await faceClient.Face.IdentifyAsync(faceIds, personGroupId);
+                            foreach (var identifyResult in results)
+                            {
+                                FaceData.Message = $"Result of face: {identifyResult.FaceId}";
+                                if (identifyResult.Candidates.Count == 0)
+                                {
+                                    FaceData.Message = "No one identified";
+                                }
+                                else
+                                {
+                                    // Get top 1 among all candidates returned
+                                    var candidateId = identifyResult.Candidates[0].PersonId;
+                                    var identifiedperson = await faceClient.PersonGroupPerson.GetAsync(personGroupId, candidateId);
+                                    FaceData.IdentifiedPerson = identifiedperson.Name;
+                                    FaceData.Message = $"Welcome {identifiedperson.Name}";
+
+                                    break; //Breaking the loop as person has been identified.
+                                }
+                            }
+                        }
+
                     }
-                }
-
-                await faceClient.PersonGroup.TrainAsync(personGroupId);
-
-                TrainingStatus trainingStatus = null;
-                while (true)
-                {
-                    trainingStatus = await faceClient.PersonGroup.GetTrainingStatusAsync(personGroupId);
-
-                    if (trainingStatus.Status != TrainingStatusType.Running)
+                    catch (Microsoft.Rest.TransientFaultHandling.HttpRequestWithStatusException httpEx)
                     {
+                        FaceData.Message = httpEx.Message;
+                    }
+                    catch (APIErrorException apiex)
+                    {
+                        FaceData.Message = apiex.Message;
+
+                    }
+                    catch (Exception ex)
+                    {
+                        FaceData.Message = ex.Message;
+                    }
+                    if (!string.IsNullOrEmpty(FaceData.IdentifiedPerson))
                         break;
-                    }
 
-                    await Task.Delay(1000);
-                }
 
-                using (Stream s = File.OpenRead(testImagePath))
-                {
-                    var faces = await faceClient.Face.DetectWithStreamAsync(s);
-                    var faceIds = faces.Select(face => face.FaceId.Value).ToArray();
-
-                    var results = await faceClient.Face.IdentifyAsync(faceIds, personGroupId);
-                    foreach (var identifyResult in results)
-                    {
-                        FaceData.Error = $"Result of face: {identifyResult.FaceId}";
-                        if (identifyResult.Candidates.Count == 0)
-                        {
-                            FaceData.Error = "No one identified";
-                        }
-                        else
-                        {
-                            // Get top 1 among all candidates returned
-                            var candidateId = identifyResult.Candidates[0].PersonId;
-                            var identifiedperson = await faceClient.PersonGroupPerson.GetAsync(personGroupId, candidateId);
-                            FaceData.IdentifiedPerson = identifiedperson.Name;
-                            break; //Breaking the loop as person has been identified.
-                        }
-                    }
                 }
 
                 if (!string.IsNullOrEmpty(FaceData.IdentifiedPerson))
-                    break;
-            }
-
-
-            if (!string.IsNullOrEmpty(FaceData.IdentifiedPerson))
-            {
-                foreach (var item in FaceData.FaceDataModels)
                 {
-                    if (item.Name.Equals(FaceData.IdentifiedPerson))
+                    foreach (var item in FaceData.FaceDataModels)
                     {
-                        if (item.Status == StatusEnum.Enter.ToString())
+                        if (item.Name.Equals(FaceData.IdentifiedPerson))
                         {
-                            item.Status = StatusEnum.Exit.ToString();
+                            if (item.Status == StatusEnum.Enter.ToString())
+                            {
+                                item.Status = StatusEnum.Exit.ToString();
+                            }
+                            else
+                            {
+                                item.Status = StatusEnum.Enter.ToString();
+                            }
+                            break;
                         }
-                        else
-                        {
-                            item.Status = StatusEnum.Enter.ToString();
-                        }
-                        break;
                     }
                 }
+                FaceData.IsEnable = true;
+                FaceData.IdentifiedPerson = string.Empty; // making empty for other person encounter 
+
+
             }
-            FaceData.IsEnable = true;
-            FaceData.IdentifiedPerson = string.Empty; // making empty for other person encounter 
+            catch (Exception ex)
+            {
+                FaceData.Message = ex.Message;
+            }
         }
 
     }

@@ -69,6 +69,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net" />
@@ -110,7 +111,6 @@
     <Compile Include="Model\FaceDataModel.cs" />
     <Compile Include="Model\ObservableObject.cs" />
     <Compile Include="ViewModel\AtsViewModel.cs" />
-    <Compile Include="ViewModel\RegisterNewUserViewModel.cs" />
     <Compile Include="View\FaceDetectView.xaml.cs">
       <DependentUpon>FaceDetectView.xaml</DependentUpon>
     </Compile>

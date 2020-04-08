@@ -16,11 +16,11 @@ namespace ats.client.Model
         private string selectedFile;
         private string selectedFileName;
         private string name;
+        private string message;
         private string entryTime;
         private string exitTime;
         private string status;
         private int id;
-        private string error;
         private ImageSource imageSource;
         private ObservableCollection<FaceDataModel> faceDataModels;
         private BitmapSource videoStream;
@@ -83,8 +83,7 @@ namespace ats.client.Model
         public string EntryTime { get => entryTime; set { if (entryTime != value) { entryTime = value; OnPropertyChanged(nameof(EntryTime)); } } }
         public string ExitTime { get => exitTime; set { if (exitTime != value) { exitTime = value; OnPropertyChanged(nameof(ExitTime)); } } }
         public string Status { get => status; set { if (status != value) { status = value; OnPropertyChanged(nameof(Status)); } } }
-        public string Error { get => error; set { if (error != value) { error = value; OnPropertyChanged(nameof(Error)); } } }
-
+        public string Message { get => message; set { if (message != value) { message = value; OnPropertyChanged(nameof(Message)); } } }
         public string IdentifiedPerson { get => identifiedPerson; set { identifiedPerson = value; OnPropertyChanged(nameof(IdentifiedPerson)); } }
     }
 

@@ -81,26 +81,23 @@
                                 Grid.Column="2">
                         <uc:RegisteredUserView x:Name="ucRegdUser" />
                         </StackPanel>
-                       
-
-
                 </Grid>
-                    
-                <materialDesign:Snackbar IsActive="{Binding ElementName=MenuToggleButton, Path=IsChecked}">
+
+                <materialDesign:Snackbar 
+                    IsActive="{Binding FaceData.IsVisible}" Background="#6A3CB9">
                     <materialDesign:SnackbarMessage>
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="ThumbUp"
                                                      Height="30"
                                                      Width="30" />
+                            <!--<TextBlock Margin="7"
+                                       Text="Design and Developed by 'Anand Mani Tiwari (anandtiwari@live.com)'"></TextBlock>-->
                             <TextBlock Margin="7"
-                                       Text="Design and Developed by 'Anand Mani Tiwari (anandtiwari@live.com)'"></TextBlock>
+                                       Text="{Binding FaceData.Message}"></TextBlock>
+                            
                         </StackPanel>
                     </materialDesign:SnackbarMessage>
                 </materialDesign:Snackbar>
-
-
-               
-
             </StackPanel>
 
         </Viewbox>
