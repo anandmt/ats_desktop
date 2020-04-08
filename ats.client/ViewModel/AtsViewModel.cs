@@ -166,13 +166,17 @@ namespace ats.client.ViewModel
 
         private void RegisterCommandExecute(object obj)
         {
-            Helper.CreateFolder(FaceData.Name);
-            var imagePath = SaveImageToFolder(FaceData.Name, FaceData.SelectedFileName, FaceData.SelectedFile);
-            if (!string.IsNullOrEmpty(imagePath))
-                AddPersonToList(imagePath);
-            else
+
+            if (!string.IsNullOrEmpty(FaceData.Name) || !string.IsNullOrEmpty(FaceData.SelectedFile))
             {
-                FaceData.Message = "";
+                Helper.CreateFolder(FaceData.Name);
+                var imagePath = SaveImageToFolder(FaceData.Name, FaceData.SelectedFileName, FaceData.SelectedFile);
+                if (!string.IsNullOrEmpty(imagePath))
+                    AddPersonToList(imagePath);
+                else
+                {
+                    FaceData.Message = "";
+                }
             }
         }
 
