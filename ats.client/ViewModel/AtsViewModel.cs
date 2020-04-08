@@ -9,12 +9,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using ats.client.Helpers;
 using ats.client.Model;
 using ats.client.Properties;
+using Emgu.CV;
+using Emgu.CV.Structure;
+using Emgu.CV.CvEnum;
 using Microsoft.Azure.CognitiveServices.Vision.Face;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.Win32;
+using System.Drawing.Imaging;
 
 namespace ats.client.ViewModel
 {
@@ -25,12 +30,17 @@ namespace ats.client.ViewModel
         private readonly IFaceClient faceClient = new FaceClient(
            new ApiKeyServiceClientCredentials(subscriptionKey),
            new System.Net.Http.DelegatingHandler[] { });
-        string personGroupId = "atsRegisteredGroup";
+        readonly string personGroupId = "atsregistered";
         private FaceDataModel _faceDataModel;
         private BitmapSource _bitmapSource;
+        private VideoCapture _capture;
+        private CascadeClassifier _haarCascade;
+        DispatcherTimer _timer;
+
         #region Commands
         public ICommand OpenFileCommand { get; }
         public ICommand RegisterCommand { get; }
+        public ICommand MarkAttendanceCommand { get; }
 
         #endregion Commands
 
@@ -56,28 +66,67 @@ namespace ats.client.ViewModel
             FaceData = faceDataModel;
             OpenFileCommand = new DelegateCommand(OpenFileCommandExecute);
             RegisterCommand = new DelegateCommand(RegisterCommandExecute);
-            CreateFolder();
+            MarkAttendanceCommand = new DelegateCommand(MarkAttendanceCommandExecute);
+
+            Helper.CreateFolder();
             FaceData.FaceDataModels = new ObservableCollection<FaceDataModel>();
             SeedData();
-            //if (Uri.IsWellFormedUriString(faceEndpoint, UriKind.Absolute))
-            //{
-            //    faceClient.Endpoint = faceEndpoint;
-            //}
-            //else
-            //{
-            //    //Invalid URI
-            //    Environment.Exit(0);
-            //}
-
-            //  CreatePersonAsync();
-            //CreateUserGroupAsync();
+            FaceDetect();
+            if (Uri.IsWellFormedUriString(faceEndpoint, UriKind.Absolute))
+            {
+                faceClient.Endpoint = faceEndpoint;
+            }
+            else
+            {
+                // Environment.Exit(0);
+                FaceData.Error = "Invalid URI";
+            }
+            FaceData.IsEnable = true;
+            //  FaceData.IsVisible = !FaceData.IsEnable;
         }
 
 
 
+        private void MarkAttendanceCommandExecute(object obj)
+        {
+            FaceData.IsEnable = false;
+            Image<Bgr, Byte> captureCurrentFrame = _capture.QueryFrame().ToImage<Bgr, Byte>();
+            var path = Helper.CreateFolder("Temp");
+            var imgPath = Path.Combine(path, "TestImage.jpg");
+            captureCurrentFrame.Save(imgPath);
+            TrainIdentificationModel(imgPath);
+
+        }
+
+        private void FaceDetect()
+        {
+            _capture = new VideoCapture();
+            _haarCascade = new CascadeClassifier(@"haarcascade_frontalface_alt_tree.xml");
+            _timer = new DispatcherTimer();
+            _timer.Tick += (_, __) =>
+            {
+                Image<Bgr, Byte> currentFrame = _capture.QueryFrame().ToImage<Bgr, Byte>();
+                if (currentFrame != null)
+                {
+                    Image<Gray, Byte> grayFrame = currentFrame.Convert<Gray, Byte>();
+                    var detectedFaces = _haarCascade.DetectMultiScale(grayFrame);
+                    foreach (var face in detectedFaces)
+                    {
+                        currentFrame.Draw(face, new Bgr(0, double.MaxValue, 0), 2, LineType.FourConnected);
+                    }
+
+                    FaceData.VideoStream = Helper.ToBitmapSource(currentFrame);
+                }
+            };
+            _timer.Interval = new TimeSpan(0, 0, 0, 0, 1);
+            _timer.Start();
+
+        }
+
+
         private void SeedData()
         {
-            CreateFolder("Anand");
+            Helper.CreateFolder("Anand");
 
             string appFolderPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             string path = Path.Combine(
@@ -86,37 +135,47 @@ namespace ats.client.ViewModel
             FaceData.FaceDataModels.Add(new FaceDataModel
             {
                 Id = 0,
-                Name = "Anand Tiwari",
+                Name = "Anand",
                 EntryTime = DateTime.Now.ToString(),
                 ExitTime = string.Empty,
                 Status = StatusEnum.Enter.ToString(),
                 SelectedFileName = "anand_lnkdn.jpg",
-                SelectedFile= $"{path}\\anand_lnkdn.jpg",
+                SelectedFile = $"{path}\\anand_lnkdn.jpg",
                 ImageSource = Helper.BitmapToBitmapSource(Resources.anand_lnkdn)
 
             });
-            SaveImageToFolder(FaceData.FaceDataModels[0].Name,FaceData.FaceDataModels[0].SelectedFileName);
+            SaveImageToFolder(FaceData.FaceDataModels[0].Name,
+                FaceData.FaceDataModels[0].SelectedFileName, FaceData.FaceDataModels[0].SelectedFile);
+
+            //Second User.
+            Helper.CreateFolder("Test User");
             FaceData.FaceDataModels.Add(new FaceDataModel
             {
                 Id = 1,
-                Name = "Arti Tiwari",
+                Name = "Test User",
                 EntryTime = DateTime.Now.ToString(),
                 ExitTime = DateTime.Now.ToString(),
                 Status = StatusEnum.Exit.ToString(),
                 ImageSource = Helper.BitmapToBitmapSource(Resources.t1),
-                SelectedFileName="t1.jpg",
-                SelectedFile=$"{path}\\t1.jpg"
+                SelectedFileName = "t1.jpg",
+                SelectedFile = $"{path}\\t1.jpg"
 
             });
-            SaveImageToFolder(FaceData.FaceDataModels[1].Name, FaceData.FaceDataModels[1].SelectedFileName);
+            SaveImageToFolder(FaceData.FaceDataModels[1].Name, FaceData.FaceDataModels[1].SelectedFileName,
+                FaceData.FaceDataModels[1].SelectedFile);
 
         }
 
         private void RegisterCommandExecute(object obj)
         {
-            CreateFolder(FaceData.Name);
-            var imagePath = SaveImageToFolder(FaceData.Name,FaceData.SelectedFileName);
-            AddPersonToList(imagePath);
+            Helper.CreateFolder(FaceData.Name);
+            var imagePath = SaveImageToFolder(FaceData.Name, FaceData.SelectedFileName, FaceData.SelectedFile);
+            if (!string.IsNullOrEmpty(imagePath))
+                AddPersonToList(imagePath);
+            else
+            {
+                FaceData.Error = "";
+            }
         }
 
         private void AddPersonToList(string imagePath)
@@ -134,35 +193,18 @@ namespace ats.client.ViewModel
             });
         }
 
-        private string SaveImageToFolder(string name, string selectedFileName)
+        private string SaveImageToFolder(string name, string selectedFileName, string selectedFilePath)
         {
-              var  path = $"C:\\ATS\\{name}\\{selectedFileName}";
+            var path = $"C:\\ATS\\{name}\\{selectedFileName}";
 
             if (!File.Exists(path))
-            {
-                File.Copy(FaceData.SelectedFile, path);
-                return path;
-            }
+                File.Copy(selectedFilePath, path);
             else
-            {
                 FaceData.Error = $"File {FaceData.SelectedFile} already exists.";
-                return "";
-            }
+            return path;
         }
 
-        private void CreateFolder(string folderName = "ATS")
-        {
-            string path = string.Empty;
-            if (folderName != "ATS")
-                path = Path.Combine(@"C:\ATS\", folderName);
-            else
-                path = Path.Combine(@"C:\", folderName);
 
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-        }
 
         private void OpenFileCommandExecute(object obj)
         {
@@ -187,96 +229,102 @@ namespace ats.client.ViewModel
             }
         }
 
-        private async void CreateUserGroupAsync()
+        private async void TrainIdentificationModel(string testImagePath)
         {
-            // Create an empty PersonGroup
-
-            await faceClient.PersonGroup.DeleteAsync(personGroupId);
-
-            await faceClient.PersonGroup.CreateAsync(personGroupId, "My Friends");
-
-            // Define Anna
-            Person friend1 = await faceClient.PersonGroupPerson.CreateAsync(
-                // Id of the PersonGroup that the person belonged to
-                personGroupId,
-                // Name of the person
-                "Anna"
-            );
-        }
-
-        private async void CreatePersonAsync()
-        {
-            //temp
-            await faceClient.PersonGroup.DeleteAsync(personGroupId);
-
-            await faceClient.PersonGroup.CreateAsync(personGroupId, "My Friends");
-
-            // Define Anna
-            Person friend1 = await faceClient.PersonGroupPerson.CreateAsync(
-                // Id of the PersonGroup that the person belonged to
-                personGroupId,
-                // Name of the person
-                "Anna"
-            );
-
-            //temp
-
-            // Define Bill and Clare in the same way
-
-            // Directory contains image files of Anna
-            const string friend1ImageDir = @"C:\Users\atiwari\Pictures\Camera Roll\Anand\";
-
-            foreach (string imagePath in Directory.GetFiles(friend1ImageDir, "*.jpg"))
+            try
             {
-                using (Stream s = File.OpenRead(imagePath))
-                {
-                    // Detect faces in the image and add to Anna
-                    await faceClient.PersonGroupPerson.AddFaceFromStreamAsync(
-                        personGroupId, friend1.PersonId, s);
-                }
+                await faceClient.PersonGroup.DeleteAsync(personGroupId);
             }
-            // Do the same for Bill and Clare
-
-            await faceClient.PersonGroup.TrainAsync(personGroupId);
-
-            TrainingStatus trainingStatus = null;
-            while (true)
+            catch (Exception ex)
             {
-                trainingStatus = await faceClient.PersonGroup.GetTrainingStatusAsync(personGroupId);
+                FaceData.Error = ex.Message;
+            }
 
-                if (trainingStatus.Status != TrainingStatusType.Running)
+            await faceClient.PersonGroup.CreateAsync(personGroupId, "Ats Registered");
+
+            foreach (var item in FaceData.FaceDataModels)
+            {
+                // Define user
+                Person person = await faceClient.PersonGroupPerson.CreateAsync(
+                    personGroupId,
+                    item.Name
+                );
+
+                foreach (string imagePath in Directory.GetFiles($"C:\\ATS\\{item.Name}\\", "*.jpg"))
                 {
+                    using (Stream s = File.OpenRead(imagePath))
+                    {
+                        // Detect faces in the image and add
+                        await faceClient.PersonGroupPerson.AddFaceFromStreamAsync(
+                            personGroupId, person.PersonId, s);
+                    }
+                }
+
+                await faceClient.PersonGroup.TrainAsync(personGroupId);
+
+                TrainingStatus trainingStatus = null;
+                while (true)
+                {
+                    trainingStatus = await faceClient.PersonGroup.GetTrainingStatusAsync(personGroupId);
+
+                    if (trainingStatus.Status != TrainingStatusType.Running)
+                    {
+                        break;
+                    }
+
+                    await Task.Delay(1000);
+                }
+
+                using (Stream s = File.OpenRead(testImagePath))
+                {
+                    var faces = await faceClient.Face.DetectWithStreamAsync(s);
+                    var faceIds = faces.Select(face => face.FaceId.Value).ToArray();
+
+                    var results = await faceClient.Face.IdentifyAsync(faceIds, personGroupId);
+                    foreach (var identifyResult in results)
+                    {
+                        FaceData.Error = $"Result of face: {identifyResult.FaceId}";
+                        if (identifyResult.Candidates.Count == 0)
+                        {
+                            FaceData.Error = "No one identified";
+                        }
+                        else
+                        {
+                            // Get top 1 among all candidates returned
+                            var candidateId = identifyResult.Candidates[0].PersonId;
+                            var identifiedperson = await faceClient.PersonGroupPerson.GetAsync(personGroupId, candidateId);
+                            FaceData.IdentifiedPerson = identifiedperson.Name;
+                            break; //Breaking the loop as person has been identified.
+                        }
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(FaceData.IdentifiedPerson))
                     break;
-                }
-
-                await Task.Delay(1000);
             }
 
 
-            string testImageFile = @"C:\Users\atiwari\Pictures\Camera Roll\test\anand.jpg";
-
-            using (Stream s = File.OpenRead(testImageFile))
+            if (!string.IsNullOrEmpty(FaceData.IdentifiedPerson))
             {
-                var faces = await faceClient.Face.DetectWithStreamAsync(s);
-                var faceIds = faces.Select(face => face.FaceId.Value).ToArray();
-
-                var results = await faceClient.Face.IdentifyAsync(faceIds, personGroupId);
-                foreach (var identifyResult in results)
+                foreach (var item in FaceData.FaceDataModels)
                 {
-                    Console.WriteLine("Result of face: {0}", identifyResult.FaceId);
-                    if (identifyResult.Candidates.Count == 0)
+                    if (item.Name.Equals(FaceData.IdentifiedPerson))
                     {
-                        Console.WriteLine("No one identified");
-                    }
-                    else
-                    {
-                        // Get top 1 among all candidates returned
-                        var candidateId = identifyResult.Candidates[0].PersonId;
-                        var person = await faceClient.PersonGroupPerson.GetAsync(personGroupId, candidateId);
-                        Console.WriteLine("Identified as {0}", person.Name);
+                        if (item.Status == StatusEnum.Enter.ToString())
+                        {
+                            item.Status = StatusEnum.Exit.ToString();
+                        }
+                        else
+                        {
+                            item.Status = StatusEnum.Enter.ToString();
+                        }
+                        break;
                     }
                 }
             }
+            FaceData.IsEnable = true;
+            FaceData.IdentifiedPerson = string.Empty; // making empty for other person encounter 
         }
+
     }
 }

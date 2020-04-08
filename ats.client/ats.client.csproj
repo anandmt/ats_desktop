@@ -120,6 +120,9 @@
     <Compile Include="View\OpenFile.xaml.cs">
       <DependentUpon>OpenFile.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Popup.xaml.cs">
+      <DependentUpon>Popup.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\RegisteredUserView.xaml.cs">
       <DependentUpon>RegisteredUserView.xaml</DependentUpon>
     </Compile>
@@ -148,6 +151,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\OpenFile.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Popup.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

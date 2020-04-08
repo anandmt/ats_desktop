@@ -7,7 +7,9 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
     <Grid>
 
-        <Image Height="500" Name="FaceImage" Stretch="Fill" Source="/Resources/anand_lnkdn.jpg" />
+        <!--<Image Height="500" Name="FaceImage" Stretch="Fill" Source="/Resources/anand_lnkdn.jpg" />-->
+        <Image Height="500" Stretch="Fill" Source="{Binding FaceData.VideoStream}" />
+        
         <!--<Button x:Name="captureButton" Click="captureButton_Click" Grid.Column="1" Grid.Row="0" >capture Button</Button>
         <TextBlock x:Name="txtName" Grid.Row="0" Grid.Column="1"></TextBlock>-->
     </Grid>

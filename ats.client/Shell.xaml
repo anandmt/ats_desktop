@@ -17,7 +17,8 @@
     <Grid>
         <Viewbox VerticalAlignment="Top" Stretch="Uniform"
                  HorizontalAlignment="Center">
-            <StackPanel Orientation="Vertical">
+
+                <StackPanel Orientation="Vertical">
                 <materialDesign:ColorZone Mode="PrimaryMid"
                                           Padding="16"
                                           CornerRadius="3"
@@ -50,16 +51,16 @@
                     </Grid.ColumnDefinitions>
 
                         <materialDesign:Card
-	Width="300"
-	Background="#03a9f4"
-	Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
+	                                 Width="300"
+	                                 Background="#03a9f4"
+	                                 Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
                                      Height="100" Grid.Column="0">
                         <uc:MarkAttendanceView Grid.Row="0"/>
                     </materialDesign:Card>
                     <materialDesign:Card
-	Width="300" Height="360"
-	Background="#03a9f4"
-	Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
+	                                     Width="300" Height="360"
+	                                     Background="#03a9f4"
+	                                     Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
                                          Grid.Column="0"
                                          Grid.Row="1">
                         <uc:RegisterNewUserView />
@@ -73,15 +74,7 @@
                         <uc:FaceDetectView />
 
                     </materialDesign:Card>
-                    <!--<materialDesign:Card
-	                                     Width="200"
-                                         Height="500"
-	                                     Margin="10,4,0,0"
-	                                     Padding="30"
-	                                     Background="#303030"
-	                                     Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
-                                         Grid.RowSpan="3"
-                                         Grid.Column="2">-->
+                   
                     <StackPanel Orientation="Vertical" 
                                 Margin="30,20,0,0" 
                                 Grid.RowSpan="3"
@@ -90,9 +83,9 @@
                         </StackPanel>
                        
 
-                    <!--</materialDesign:Card>-->
 
                 </Grid>
+                    
                 <materialDesign:Snackbar IsActive="{Binding ElementName=MenuToggleButton, Path=IsChecked}">
                     <materialDesign:SnackbarMessage>
                         <StackPanel Orientation="Horizontal">
@@ -105,7 +98,11 @@
                     </materialDesign:SnackbarMessage>
                 </materialDesign:Snackbar>
 
+
+               
+
             </StackPanel>
+
         </Viewbox>
     </Grid>
 </Window>

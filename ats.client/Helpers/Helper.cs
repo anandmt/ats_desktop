@@ -4,6 +4,8 @@ using Emgu.CV.Structure;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -45,5 +47,28 @@ namespace ats.client.Helpers
                           BitmapSizeOptions.FromEmptyOptions());
         }
 
+        public static Stream ToStream(this Image image, ImageFormat format)
+        {
+            var stream = new System.IO.MemoryStream();
+            image.Save(stream, format);
+            stream.Position = 0;
+            return stream;
+        }
+
+        public static string CreateFolder(string folderName = "ATS")
+        {
+            string path;
+            if (folderName != "ATS")
+                path = Path.Combine(@"C:\ATS\", folderName);
+            else
+                path = Path.Combine(@"C:\", folderName);
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            return path;
+        }
     }
 }

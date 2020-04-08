@@ -24,9 +24,9 @@ namespace ats.client.View
     /// </summary>
     public partial class FaceDetectView : UserControl
     {
-        private VideoCapture _capture;
-        private CascadeClassifier _haarCascade;
-        DispatcherTimer _timer;
+        //private VideoCapture _capture;
+        //private CascadeClassifier _haarCascade;
+        //DispatcherTimer _timer;
 
         public FaceDetectView()
         {
@@ -34,35 +34,35 @@ namespace ats.client.View
           //  FaceDetect();
         }
 
-        private void FaceDetect()
-        {
-            _capture = new VideoCapture();
-            _haarCascade = new CascadeClassifier(@"haarcascade_frontalface_alt_tree.xml");
-            _timer = new DispatcherTimer();
-            _timer.Tick += (_, __) =>
-            {
-                Image<Bgr, Byte> currentFrame = _capture.QueryFrame().ToImage<Bgr, Byte>();
-                if (currentFrame != null)
-                {
-                    Image<Gray, Byte> grayFrame = currentFrame.Convert<Gray, Byte>();
-                    var detectedFaces = _haarCascade.DetectMultiScale(grayFrame);
-                    foreach (var face in detectedFaces)
-                    {
-                        currentFrame.Draw(face, new Bgr(0, double.MaxValue, 0), 2, LineType.FourConnected);
-                    }
-                    FaceImage.Source = Helper.ToBitmapSource(currentFrame);
-                }
-            };
-            _timer.Interval = new TimeSpan(0, 0, 0, 0, 1);
-            _timer.Start();
-        }
+        //private void FaceDetect()
+        //{
+        //    _capture = new VideoCapture();
+        //    _haarCascade = new CascadeClassifier(@"haarcascade_frontalface_alt_tree.xml");
+        //    _timer = new DispatcherTimer();
+        //    _timer.Tick += (_, __) =>
+        //    {
+        //        Image<Bgr, Byte> currentFrame = _capture.QueryFrame().ToImage<Bgr, Byte>();
+        //        if (currentFrame != null)
+        //        {
+        //            Image<Gray, Byte> grayFrame = currentFrame.Convert<Gray, Byte>();
+        //            var detectedFaces = _haarCascade.DetectMultiScale(grayFrame);
+        //            foreach (var face in detectedFaces)
+        //            {
+        //                currentFrame.Draw(face, new Bgr(0, double.MaxValue, 0), 2, LineType.FourConnected);
+        //            }
+        //            FaceImage.Source = Helper.ToBitmapSource(currentFrame);
+        //        }
+        //    };
+        //    _timer.Interval = new TimeSpan(0, 0, 0, 0, 1);
+        //    _timer.Start();
+        //}
 
        
 
-        private void captureButton_Click(object sender, RoutedEventArgs e)
-        {
-            Image<Bgr, Byte> imgeOrigenal = _capture.QueryFrame().ToImage<Bgr, Byte>();
-            imgeOrigenal.Save(@"C:\Users\atiwari\source\test\j.jpg");
-        }
+        //private void captureButton_Click(object sender, RoutedEventArgs e)
+        //{
+        //    Image<Bgr, Byte> imgeOrigenal = _capture.QueryFrame().ToImage<Bgr, Byte>();
+        //    imgeOrigenal.Save(@"C:\Users\atiwari\source\test\j.jpg");
+        //}
     }
 }

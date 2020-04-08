@@ -23,6 +23,25 @@ namespace ats.client.Model
         private string error;
         private ImageSource imageSource;
         private ObservableCollection<FaceDataModel> faceDataModels;
+        private BitmapSource videoStream;
+        private string identifiedPerson;
+        private bool isEnable;
+        private bool isVisible;
+
+        public bool IsEnable { get => isEnable; set { 
+                
+                isEnable = value;
+                if (value)
+                {
+                    IsVisible = false;
+                }
+                else
+                {
+                    IsVisible = true;
+                }
+                OnPropertyChanged(nameof(IsEnable)); } }
+        public bool IsVisible { get => isVisible; set { isVisible = value; OnPropertyChanged(nameof(IsVisible)); } }
+        
 
         public ObservableCollection<FaceDataModel> FaceDataModels { get => faceDataModels; set { faceDataModels = value; OnPropertyChanged(nameof(FaceDataModels)); } }
         public ImageSource ImageSource
@@ -30,6 +49,8 @@ namespace ats.client.Model
             get => imageSource;
             set { imageSource = value; OnPropertyChanged(nameof(ImageSource)); }
         }
+
+        public BitmapSource VideoStream { get => videoStream; set { videoStream = value; OnPropertyChanged(nameof(VideoStream)); } }
 
         public string SelectedFile
         {
@@ -64,6 +85,7 @@ namespace ats.client.Model
         public string Status { get => status; set { if (status != value) { status = value; OnPropertyChanged(nameof(Status)); } } }
         public string Error { get => error; set { if (error != value) { error = value; OnPropertyChanged(nameof(Error)); } } }
 
+        public string IdentifiedPerson { get => identifiedPerson; set { identifiedPerson = value; OnPropertyChanged(nameof(IdentifiedPerson)); } }
     }
 
 
